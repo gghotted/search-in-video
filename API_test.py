@@ -27,14 +27,14 @@ def sample_long_running_recognize(storage_uri):
 
     audio_channel_count = 2
 
-    enable_separate_recognition_per_channel = True
+    enable_separate_recognition_per_channel = False
 
     enable_word_time_offsets = True
 
     config = {
         "enable_word_time_offsets": enable_word_time_offsets,
         "audio_channel_count": audio_channel_count,
-        "enable_separate_recognition_per_channel": enable_separate_recognition_per_channel,
+        #"enable_separate_recognition_per_channel": enable_separate_recognition_per_channel,
         #"sample_rate_hertz": sample_rate_hertz,
         "language_code": language_code,
         #"encoding": encoding,
@@ -46,8 +46,8 @@ def sample_long_running_recognize(storage_uri):
     print(u"Waiting for operation to complete...")
     response = operation.result()
     print(response)
-    # with open('api_response/cnn_1min.txt', 'wb') as make_file:
-    #     pickle.dump(response, make_file)
+    with open('api_response/cnn_1min2.txt', 'wb') as make_file:
+        pickle.dump(response, make_file)
 
     for result in response.results:
         # First alternative is the most probable result
