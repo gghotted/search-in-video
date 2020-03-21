@@ -1,16 +1,28 @@
-from django.shortcuts import render, HttpResponse
-from django.views import generic
+from django.shortcuts import render, HttpResponse, redirect
+from django.views.generic import View
+from django.core.files import File
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
+
 from .models import Video, Word
 from .util import OverwriteStorage, recognize_by_google_stt, get_timestamp
-from django.core.files import File
+
 import moviepy.editor as mp
 
 
-class IndexView(generic.View):
+class ListView(View):
     def get(self, request):
-        return render(request, 'index.html')
+        user = request.user
+        videos = Video.objects.filter(user=user)
+        return render(request, 'list.html', {'videos': videos})
+
+
+class UploadView(View):
+    def get(self, request):
+        return render(request, 'upload.html')
 
     def post(self, request):
+        user = request.user
         video_file = request.FILES['file']
         file_name = video_file.name[:-4]
 
@@ -24,7 +36,7 @@ class IndexView(generic.View):
         # audio_file = File(open('tmp/tmp.wav', 'rb'))
         #
         # # db, cloud 저장소에 save
-        # video = Video(video=video_file)
+        # video = Video(user=user, video=video_file)
         # video.audio.save(file_name+'.wav', audio_file)
         # video.save()
         #
@@ -37,4 +49,21 @@ class IndexView(generic.View):
         #     print(text, start_at, end_at, '저장완료')
 
         return HttpResponse('완료')
+
+
+class LoginView(View):
+    def get(self, request):
+        return render(request, 'login.html')
+
+    def post(self, request):
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('list')
+        else:
+            error_msg = '잘못된 정보입니다.'
+            return render(request, 'login.html', {'error_msg': error_msg})
 
