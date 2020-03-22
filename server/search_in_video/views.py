@@ -3,6 +3,8 @@ from django.views.generic import View
 from django.core.files import File
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 from .models import Video, Word
 from .util import OverwriteStorage, recognize_by_google_stt, get_timestamp
@@ -13,7 +15,12 @@ import moviepy.editor as mp
 class ListView(View):
     def get(self, request):
         user = request.user
+        find_text = request.GET.get('find_text')
+
         videos = Video.objects.filter(user=user)
+        if find_text:
+            videos = videos.filter(words__text__startswith=find_text)
+
         return render(request, 'list.html', {'videos': videos})
 
 
@@ -66,4 +73,27 @@ class LoginView(View):
         else:
             error_msg = '잘못된 정보입니다.'
             return render(request, 'login.html', {'error_msg': error_msg})
+
+
+@login_required
+def search(request):
+    user = request.user
+    find_text = request.GET.get('find_text', '')
+    words = Word.objects.filter(video__user=user,
+                                text__startswith=find_text)
+    response_words = [{'text': word.text,
+                       'start_at': word.start_at,
+                       'end_at': word.end_at,
+                       'video_title': word.video.title,
+                       'video_id': word.pk} for word in words]
+    return JsonResponse({'words': response_words})
+
+
+@login_required
+def get_video(request, pk):
+    video = Video.objects.get(pk=pk)
+    response_video = {'url': video.video.url,
+                      'title': video.title}
+    return JsonResponse({'video': response_video})
+
 

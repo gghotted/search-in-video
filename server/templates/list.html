@@ -1,12 +1,64 @@
 <!DOCTYPE html>
+{% load util_tags %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="http://malsup.github.com/jquery.form.js"></script>
 </head>
 <body>
-{% for video in videos %}
-    <a href="{{video.video.url}}">{{video}}</a>
-{% endfor %}
+<form>
+    <input id="find_text" name="find_text" value="{{request.GET.find_text}}">
+    <button>검색</button>
+</form>
+<div id="searched_words"></div>
+<div id="searched_word">
+    <span id="word_text"></span> <span id="video_title"></span>
+</div>
+
+<div id="videos">
+    {% for video in videos %}
+    <video src="{{video.video.url}}" width="640" controls></video>
+        {% call_method video 'filter_words' 'cnn' as words %}
+        {% for word in words %}
+            {{word.text}}
+        {% endfor %}
+    <br>
+    {% endfor %}
+</div>
+<div id="video"></div>
+<script>
+$(function() {
+
+    $('#find_text').keyup(function(){
+        if(this.value == ''){
+            $('#searched_words').empty();
+            return;
+        }
+
+        $.ajax({
+            url: '/search',
+            data: {find_text: this.value},
+            method: 'GET',
+            dataType: 'json'
+        })
+        .done(function(response){
+            $('#searched_words').empty();
+            var words = response.words;
+            for(var word of words){
+                var searched_word = $('#searched_word').clone();
+                searched_word.children('#word_text').text(word.text);
+                searched_word.children('#video_title').text(word.video_title);
+                $('#searched_words').append(searched_word);
+            }
+        })
+        .fail(function(xhr, status, errorThrown) {
+            alert('실패');
+        })
+    });
+
+});
+</script>
 </body>
 </html>

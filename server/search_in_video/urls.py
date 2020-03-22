@@ -7,4 +7,5 @@ urlpatterns = [
     path('upload', views.UploadView.as_view(), name='upload'),
     path('signup', TemplateView.as_view(template_name='signup.html'), name='signup'),
     path('login', views.LoginView.as_view(), name='login'),
+    path('search', views.search, name='search'),
 ]
