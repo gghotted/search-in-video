@@ -20,10 +20,12 @@
 <div id="videos">
     {% for video in videos %}
     <video src="{{video.video.url}}" width="640" controls></video>
-        {% call_method video 'filter_words' 'cnn' as words %}
-        {% for word in words %}
-            {{word.text}}
-        {% endfor %}
+        {% if request.GET.find_text %}
+            {% call_method video 'filter_words' request.GET.find_text as words %}
+            {% for word in words %}
+                {{word.text}} {{word.start_at | date:'H:i:s'}}
+            {% endfor %}
+        {% endif %}
     <br>
     {% endfor %}
 </div>

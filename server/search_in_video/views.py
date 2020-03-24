@@ -12,6 +12,11 @@ from .util import OverwriteStorage, recognize_by_google_stt, get_timestamp
 import moviepy.editor as mp
 
 
+class IndexView(View):
+    def get(self, request):
+        return render(request, 'home.html')
+
+
 class ListView(View):
     def get(self, request):
         user = request.user
