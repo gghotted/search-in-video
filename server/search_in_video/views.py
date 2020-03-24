@@ -14,7 +14,10 @@ import moviepy.editor as mp
 
 class IndexView(View):
     def get(self, request):
-        return render(request, 'home.html')
+        videos = None
+        if request.user:
+            videos = request.user.videos.all()
+        return render(request, 'home.html', {'videos': videos})
 
 
 class ListView(View):

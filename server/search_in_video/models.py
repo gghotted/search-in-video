@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 
 class Video(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='videos')
     title = models.CharField(max_length=100)
     video = models.FileField()
     audio = models.FileField()
