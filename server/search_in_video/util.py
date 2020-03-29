@@ -16,7 +16,6 @@ class OverwriteStorage(FileSystemStorage):
 
 def recognize_by_google_stt(filename):
     storage_uri = f'gs://{settings.GS_BUCKET_NAME}/{filename}'
-    print(f'인식 시작, uri:{storage_uri}')
     client = speech_v1.SpeechClient()
     config = {
         "enable_word_time_offsets": True,
@@ -26,8 +25,10 @@ def recognize_by_google_stt(filename):
     audio = {"uri": storage_uri}
 
     operation = client.long_running_recognize(config, audio)
+    print(f'인식 시작, uri:{storage_uri}')
     result = operation.result()
     print('인식 끝')
+
     return result
 
 

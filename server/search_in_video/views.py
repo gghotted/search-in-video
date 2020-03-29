@@ -38,37 +38,36 @@ class UploadView(View):
         return render(request, template_name)
 
     def post(self, request, method):
-        # mp4, wav save on db
-        video = Video()
-        video.user = request.user
-        video.title = request.POST['title']
+        def get_video_file():
+            if method == 'mypc':
+                video_file = request.FILES['file']
+                OverwriteStorage('tmp/').save('tmp.mp4', video_file)
+            else:
+                video_file = youtube_download(request.POST['youtube_link'], 'tmp/', 'tmp')
 
-        # video_file 할당
-        if method == 'mypc':
-            video_file = request.FILES['file']
-            OverwriteStorage('tmp/').save('tmp.mp4', video_file)
-        else:
-            video_file = youtube_download(request.POST['youtube_link'], 'tmp/', 'tmp')
-        video_file.name = video.title + '.mp4'
-        video.video = video_file
+            video_file.name = request.POST['title'] + '.mp4'
+            return video_file
 
-        # mp4 to wav
-        mp4 = mp.VideoFileClip('tmp/tmp.mp4')
-        mp4.audio.write_audiofile('tmp/tmp.wav')
+        def get_audio_file():
+            mp4 = mp.VideoFileClip('tmp/tmp.mp4')
+            mp4.audio.write_audiofile('tmp/tmp.wav')
+            audio_file = File(open('tmp/tmp.wav', 'rb'))
+            audio_file.name = request.POST['title'] + '.wav'
+            return audio_file
 
-        # audio_file 할당
-        audio_filename = video_file.name.replace('.mp4', '.wav')
-        audio_file = File(open('tmp/tmp.wav', 'rb'))
-        video.audio.save(audio_filename, audio_file)
-
+        video = Video(user=request.user,
+                      title=request.POST['title'],
+                      video=get_video_file(),
+                      audio=get_audio_file())
         video.save()
 
-        response = recognize_by_google_stt(str(video.audio))
-
         # 인식된 word 를 db에 저장
+        response = recognize_by_google_stt(str(video.audio))
         for text, start_at, end_at in get_timestamp(response):
-            Word(text=text, start_at=start_at, end_at=end_at,
-                 video=video).save()
+            Word(video=video,
+                 text=text,
+                 start_at=start_at,
+                 end_at=end_at).save()
             print(text, start_at, end_at, '저장완료')
 
         return HttpResponse('완료')
