@@ -1,7 +1,9 @@
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+from django.core.files import File
 from google.cloud import speech_v1
 from datetime import time
+from pytube import YouTube
 import os
 
 
@@ -42,3 +44,13 @@ def sec2time(sec, micro_sec):
     h, rem = divmod(sec, 3600)
     m, s = divmod(rem, 60)
     return time(h, m, s, int(micro_sec))
+
+
+def youtube_download(url, download_path, filename):
+    yt = YouTube(url)
+    video = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+    print(video, '다운로드 시작')
+    video.download(download_path, filename=filename)
+    print('다운로드 완료')
+    video_file = File(open('tmp/tmp.mp4', 'rb'))
+    return video_file

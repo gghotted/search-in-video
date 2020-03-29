@@ -5,27 +5,31 @@
     <meta charset="UTF-8">
     <title>Search-in-video</title>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="{% static 'js/action.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 <div class="container">
     <!--header-->
     <div class="header">
         <div class="site-title-box">
-            <a href="/">Search in Video</a>
+            <a href="{% url 'home' %}">Search in Video</a>
         </div>
         <div class="header-info-box">
             <div class="user-storage-info">
                 {% if request.user.is_authenticated %}
                 <span class="oatmeal">등록된 동영상 : </span>
-                <a class="strong" href="/">{{request.user.videos.all|length}}개</a>
+                <a class="strong" href="{% url 'home' %}">{{request.user.videos.all|length}}개</a>
                 {% endif %}
+                <button class="btn" onclick="location.href='{% url 'upload' %}'">+</button>
             </div>
             <div class="search-info">
-                <form class="search-form">
-                    <input>
+                <form id="search_form" class="search-form" action="{% url 'list' %}">
+                    <input id="find_text" name="find_text" value="{{request.GET.find_text}}">
                     <button><i class="fa fa-search"></i></button>
                 </form>
             </div>

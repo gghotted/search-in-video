@@ -54,6 +54,7 @@
     width: 85%;
     border-radius: 3px;
 }
+
 .search-form>button{
     float: left;
     width: 15%;
@@ -73,10 +74,12 @@
 .btn{
     border-radius: 10%;
     border: 1px solid #393e46;
+    cursor: pointer;
 }
 
 a.strong{
     color: #00adb5;
+    text-decoration-line: none;
 }
 
 .content{
@@ -86,7 +89,12 @@ a.strong{
 .content>div{
     float: left;
 }
-.video-box{
+.video-box-1{
+    text-align: center;
+    width: 800px;
+    margin: 80px 40px;
+}
+.video-box-2{
     text-align: center;
     width: 400px;
     height: 400px;
@@ -96,4 +104,32 @@ video{
     border: 2px solid black;
 }
 
+.word{
+    width: 25%;
+    float: left;
+}
+.word-time{
+    cursor: pointer;
+    color: rgb(6, 95, 212);
+}
+.upload-methods{
+    width: 100%;
+    height: 500px;
+    display: table;
+}
+.upload-methods>div{
+    display: table-cell;
+    width: 50%;
+    height: 100%;
+    vertical-align: middle;
+    text-align: center;
+    font-size: larger;
+    font-weight: bolder;
+    border: 2px solid black;
+    border-radius: 10px;
+    cursor: pointer;
+}
+.upload-methods>div:hover{
+    background-color: #00adb5;
+}
 

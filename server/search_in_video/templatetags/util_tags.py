@@ -10,12 +10,8 @@ def call_method(obj, method_name, *args):
 
 
 @register.filter
-def minus(value):
-    return value - 1
+def seconds(time):
+    return (time.hour * 3600) + (time.minute * 60) + time.second
 
-
-@register.filter
-def sum(value1, value2):
-    return value1 + value2
 
 
