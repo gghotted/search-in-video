@@ -5,8 +5,10 @@ from django.contrib.auth.models import User
 class Video(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='videos')
     title = models.CharField(max_length=100)
-    video = models.FileField()
-    audio = models.FileField()
+    video = models.FileField(null=True)
+    audio = models.FileField(null=True)
+    source_type = models.CharField(max_length=50)
+    youtube_link = models.CharField(max_length=255, null=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

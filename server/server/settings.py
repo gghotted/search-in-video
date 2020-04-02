@@ -130,3 +130,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'stt_video_storage'
 
 #STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+
+CELERY_RESULT_BACKEND = 'rpc://'

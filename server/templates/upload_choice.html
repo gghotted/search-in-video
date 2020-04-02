@@ -3,7 +3,7 @@
 {% block content %}
 <h2>영상 업로드</h2>
 <div class="upload-methods">
-    <div onclick="location.href='{% url 'upload' 'mypc' %}'"><span>내 PC</span></div>
+    <div onclick="location.href='{% url 'upload' 'user-pc' %}'"><span>내 PC</span></div>
     <div onclick="location.href='{% url 'upload' 'youtube-link' %}'"><span>Youtube Link</span></div>
 </div>
 {% endblock %}

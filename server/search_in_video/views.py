@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Video, Word
 from .util import OverwriteStorage, recognize_by_google_stt, get_timestamp, youtube_download
+from .tasks import recognize_video_process
 
 import moviepy.editor as mp
 
@@ -33,43 +34,22 @@ class ListView(View):
 
 
 class UploadView(View):
-    def get(self, request, method='choice'):
-        template_name = 'upload_' + method.replace('-', '_') + '.html'
+    def get(self, request, source_type='choice'):
+        template_name = 'upload_' + source_type.replace('-', '_') + '.html'
         return render(request, template_name)
 
-    def post(self, request, method):
-        def get_video_file():
-            if method == 'mypc':
-                video_file = request.FILES['file']
-                OverwriteStorage('tmp/').save('tmp.mp4', video_file)
-            else:
-                video_file = youtube_download(request.POST['youtube_link'], 'tmp/', 'tmp')
-
-            video_file.name = request.POST['title'] + '.mp4'
-            return video_file
-
-        def get_audio_file():
-            mp4 = mp.VideoFileClip('tmp/tmp.mp4')
-            mp4.audio.write_audiofile('tmp/tmp.wav')
-            audio_file = File(open('tmp/tmp.wav', 'rb'))
-            audio_file.name = request.POST['title'] + '.wav'
-            return audio_file
+    def post(self, request, source_type):
+        video_file = request.FILES.get('file')
+        if video_file:
+            OverwriteStorage('tmp/').save('tmp.mp4', video_file)
 
         video = Video(user=request.user,
                       title=request.POST['title'],
-                      video=get_video_file(),
-                      audio=get_audio_file())
+                      source_type=source_type,
+                      youtube_link=request.POST.get('youtube_link'))
         video.save()
 
-        # 인식된 word 를 db에 저장
-        response = recognize_by_google_stt(str(video.audio))
-        for text, start_at, end_at in get_timestamp(response):
-            Word(video=video,
-                 text=text,
-                 start_at=start_at,
-                 end_at=end_at).save()
-            print(text, start_at, end_at, '저장완료')
-
+        recognize_video_process.delay(video.id)
         return HttpResponse('완료')
 
 
