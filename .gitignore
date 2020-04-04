@@ -2,4 +2,4 @@ venv/
 .idea/
 **/.ipynb_checkpoints/
 **/__pycache__/
-server/tmp/
+tmp/*
