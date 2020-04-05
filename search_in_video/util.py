@@ -57,3 +57,56 @@ def youtube_download(url, download_path, filename):
     print('다운로드 완료')
     video_file = File(open('tmp/tmp.mp4', 'rb'))
     return video_file
+
+
+class VideoFileSaveManger:
+    def __init__(self, save_path):
+        self.vf_saver = VideoFileSaver(save_path)
+
+
+    def save_by_source_type(self, source_type,
+                            video_file=None, youtube_link=None):
+        if source_type == 'user-pc':
+            self.vf_saver.save_video_file(video_file)
+        
+        if source_type == 'youtube-link':
+            self.vf_saver.save_video_file_by_youtube_link(youtube_link)
+
+
+class VideoFileSaver:
+    DEFAULT_FILENAME = 'tmp.mp4'
+
+    def __init__(self, save_path):
+        self.save_path = save_path
+
+    
+    def save_video_file(self, video_file, filename=DEFAULT_FILENAME):
+        os = OverwriteStorage(self.save_path)
+        os.save(filename, video_file)
+
+
+    def save_video_file_by_youtube_link(self, youtube_link, filename=DEFAULT_FILENAME):
+        downloader = YouTubeDownloader(youtube_link)
+        downloader.download_best_video(self.save_path, filename)
+
+
+class YouTubeDownloader:
+    def __init__(self, url):
+        self.youtube = YouTube(url)
+
+
+    def download_best_video(self, download_path, filename):
+        filename = self.delete_extension(filename)
+        video = self.get_best_video()
+        video.download(download_path, filename)
+
+
+    def get_best_video(self):
+        video = self.youtube.streams \
+                .filter(progressive=True, file_extension='mp4') \
+                .order_by('resolution').desc().first()
+        return video
+
+
+    def delete_extension(self, filename):
+        return filename.split('.')[0]

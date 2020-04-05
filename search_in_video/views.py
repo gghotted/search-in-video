@@ -8,9 +8,10 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Video, Word
 from .util import OverwriteStorage, recognize_by_google_stt, get_timestamp, youtube_download
+from .util import VideoFileSaveManger
 from .tasks import recognize_video_process
 
-import moviepy.editor as mp
+# import moviepy.editor as mp
 
 
 class IndexView(View):
@@ -39,17 +40,11 @@ class UploadView(View):
         return render(request, template_name)
 
     def post(self, request, source_type):
-        video_file = request.FILES.get('file')
-        if video_file:
-            OverwriteStorage('tmp/').save('tmp.mp4', video_file)
-
-        video = Video(user=request.user,
-                      title=request.POST['title'],
-                      source_type=source_type,
-                      youtube_link=request.POST.get('youtube_link'))
-        video.save()
-
-        recognize_video_process.delay(video.id)
+        manager = VideoFileSaveManger(save_path='tmp/')
+        manager.save_by_source_type(source_type,
+                                    request.FILES.get('file'),
+                                    request.POST.get('youtube_link'))
+        
         return HttpResponse('완료')
 
 

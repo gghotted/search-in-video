@@ -5,7 +5,7 @@ from django.core.files import File
 from .models import Video, Word
 from .util import youtube_download, recognize_by_google_stt, get_timestamp
 
-import moviepy.editor as mp
+# import moviepy.editor as mp
 
 @app.task
 def plus(x, y):
