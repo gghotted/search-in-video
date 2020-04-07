@@ -7,8 +7,8 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
 from .models import Video, Word
-from .util import OverwriteStorage, recognize_by_google_stt, get_timestamp, youtube_download
-from .util import VideoFileSaveManger
+from .util import OverwriteStorage, recognize_by_google_stt, get_timestamp
+from .youtube import MyYouTube
 from .tasks import recognize_video_process
 
 # import moviepy.editor as mp
@@ -39,13 +39,32 @@ class UploadView(View):
         template_name = 'upload_' + source_type.replace('-', '_') + '.html'
         return render(request, template_name)
 
+
     def post(self, request, source_type):
-        manager = VideoFileSaveManger(save_path='tmp/')
-        manager.save_by_source_type(source_type,
-                                    request.FILES.get('file'),
-                                    request.POST.get('youtube_link'))
-        
+        # video file을 저장한다
+        self.save_videofile_by_source_type(source_type,
+                                           videofile=request.FILES.get('file'),
+                                           youtube_link=request.POST.get('youtube_link'))
+
+        # audio file을 추출한다
+
+        # cloud storage에 저장한다
+
+        # stt api를 실행한다
+
+        # 결과를 db에 저장한다
+
         return HttpResponse('완료')
+
+    
+    def save_videofile_by_source_type(self, source_type, **kwargs):
+        if source_type == 'user-pc':
+            videofile = kwargs['videofile']
+            OverwriteStorage('tmp/').save('tmp.mp4', videofile)
+        elif source_type == 'youtube-link':
+            yt = MyYouTube(kwargs['youtube_link'])
+            yt.download_best_video('tmp/', 'tmp')
+
 
 
 class LoginView(View):
