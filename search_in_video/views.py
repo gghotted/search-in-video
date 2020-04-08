@@ -7,11 +7,10 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
 from .models import Video, Word
-from .util import OverwriteStorage, recognize_by_google_stt, get_timestamp
-from .youtube import MyYouTube
-from .tasks import recognize_video_process
+from .youtube import MyYoutube
+from .tasks import create_words_process
 
-# import moviepy.editor as mp
+import tempfile
 
 
 class IndexView(View):
@@ -41,30 +40,26 @@ class UploadView(View):
 
 
     def post(self, request, source_type):
-        # video file을 저장한다
-        self.save_videofile_by_source_type(source_type,
-                                           videofile=request.FILES.get('file'),
-                                           youtube_link=request.POST.get('youtube_link'))
+        video = Video(user=request.user,
+                      title=request.POST['title'],
+                      source_type=source_type,
+                      youtube_link=request.POST.get('youtube_link'))
+        video.save()
 
-        # audio file을 추출한다
+        create_words_process.delay(video_id=video.id,
+                                   videofile_path=self.get_videofile_path(request.FILES.get('file')))
 
-        # cloud storage에 저장한다
-
-        # stt api를 실행한다
-
-        # 결과를 db에 저장한다
 
         return HttpResponse('완료')
 
-    
-    def save_videofile_by_source_type(self, source_type, **kwargs):
-        if source_type == 'user-pc':
-            videofile = kwargs['videofile']
-            OverwriteStorage('tmp/').save('tmp.mp4', videofile)
-        elif source_type == 'youtube-link':
-            yt = MyYouTube(kwargs['youtube_link'])
-            yt.download_best_video('tmp/', 'tmp')
 
+    def get_videofile_path(self, videofile):
+        if videofile == None:
+            return
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            for chunk in videofile.chunks():
+                f.write(chunk)
+        return f.name
 
 
 class LoginView(View):

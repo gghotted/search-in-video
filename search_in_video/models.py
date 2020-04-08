@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-
-
+from django.core.files import File
+ 
 class Video(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='videos')
     title = models.CharField(max_length=100)
@@ -11,14 +11,24 @@ class Video(models.Model):
     youtube_link = models.CharField(max_length=255, null=True)
     created = models.DateTimeField(auto_now_add=True)
 
+
     def __str__(self):
         return self.title
+
 
     def filter_words(self, startswith):
         return self.words.filter(text__startswith=startswith)
 
+
     def script(self):
         return ' '.join(self.words.order_by('start_at').values_list('text', flat=True))
+
+    
+    def save_videofile_by_path(self, filepath, filename=None):
+        self.video = File(open(filepath, 'rb'))
+        self.video.name = filename or self.title
+        self.save()
+
 
     class Meta:
         ordering = ['-created']

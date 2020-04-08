@@ -2,7 +2,7 @@ from pytube import YouTube
 import os
 
 
-class MyYouTube(YouTube):
+class MyYoutube(YouTube):
     def download_best_video(self, download_path, filename):
         filename, _ = os.path.splitext(filename)
         video = self.get_best_video()
