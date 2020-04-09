@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for video in videos %}
+    <div class="uploading_video">
+        {{video.title}} {{video.created}}
+        <span class="state">{{video.state}}</span>
+        <span hidden class='video_id'>{{video.id}}</span>
+    </div>
+{% endfor %}
+<script>
+    var video_id = $('.video_id').text();
+    var webSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/' + video_id + '/state/');
+
+    webSocket.onmessage = function(e){
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+        $('.state').text(message);
+    }
+</script>
+{% endblock %}

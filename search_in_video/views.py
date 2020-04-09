@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Video, Word
 from .youtube import MyYoutube
-from .tasks import create_words_process
+from .tasks import abstract_words_process
+from .util import load_as_tempfile
 
 import tempfile
 
@@ -40,26 +41,21 @@ class UploadView(View):
 
 
     def post(self, request, source_type):
-        video = Video(user=request.user,
-                      title=request.POST['title'],
-                      source_type=source_type,
-                      youtube_link=request.POST.get('youtube_link'))
-        video.save()
+        user = request.user
+        title = request.POST.get('title')
+        youtube_link = request.POST.get('youtube_link')
+        videofile = request.FILES.get('file')
 
-        create_words_process.delay(video_id=video.id,
-                                   videofile_path=self.get_videofile_path(request.FILES.get('file')))
+        video = Video.objects.create(user=user,
+                                     title=title,
+                                     source_type=source_type,
+                                     youtube_link=youtube_link)
 
+        videofile_path = load_as_tempfile(videofile) if videofile else None
+        abstract_words_process.delay(video_id=video.id,
+                                     videofile_path=videofile_path)
 
         return HttpResponse('완료')
-
-
-    def get_videofile_path(self, videofile):
-        if videofile == None:
-            return
-        with tempfile.NamedTemporaryFile(delete=False) as f:
-            for chunk in videofile.chunks():
-                f.write(chunk)
-        return f.name
 
 
 class LoginView(View):

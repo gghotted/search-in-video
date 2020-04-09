@@ -31,6 +31,8 @@ ALLOWED_HOSTS = ['104.155.137.113']
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
+    'state',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -134,3 +136,14 @@ GS_BUCKET_NAME = 'stt_video_storage'
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 
 CELERY_RESULT_BACKEND = 'rpc://'
+
+ASGI_APPLICATION = 'server.routing.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}

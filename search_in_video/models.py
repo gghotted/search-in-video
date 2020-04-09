@@ -1,6 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.files import File
+
+from .youtube import MyYoutube
+from .util import recognize_by_google_stt, get_timestamp
+from state.consumers import announce
+
+import moviepy.editor as mp
+ 
  
 class Video(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='videos')
@@ -9,6 +16,7 @@ class Video(models.Model):
     audio = models.FileField(null=True)
     source_type = models.CharField(max_length=50)
     youtube_link = models.CharField(max_length=255, null=True)
+    state = models.CharField(max_length=50)
     created = models.DateTimeField(auto_now_add=True)
 
 
@@ -23,19 +31,54 @@ class Video(models.Model):
     def script(self):
         return ' '.join(self.words.order_by('start_at').values_list('text', flat=True))
 
-    
-    def save_videofile_by_path(self, filepath, filename=None):
-        self.video = File(open(filepath, 'rb'))
-        self.video.name = filename or self.title
-        self.save()
 
+    def set_videofile(self, filepath=None, filename=None):
+        if filepath:
+            self.set_videofile_by_path(filepath, filename)
+            return
+        
+        try:
+            yt = MyYoutube(self.youtube_link) 
+            filepath = yt.download_best_video(tempfile=True)
+            self.set_videofile_by_path(filepath, filename)
+        except Exception as e:
+            print(e)
+
+
+    def set_videofile_by_path(self, filepath, filename=None):
+        self.video = File(open(filepath, 'rb'))
+        self.video.name = filename or (self.title + '.mp4')
+
+
+    def set_audio(self):
+        videofile_path = str(self.video.file)
+        mp4 = mp.VideoFileClip(videofile_path)
+        mp4.audio.write_audiofile('tmp/tmp.wav')
+        audio_file = File(open('tmp/tmp.wav', 'rb'))
+        audio_file.name = self.video.name.replace('mp4', 'wav')
+        self.audio = audio_file
+
+
+    def create_words(self):
+        response = recognize_by_google_stt(self.audio)
+        for text, start_at, end_at in get_timestamp(response):
+            Word(video=self,
+                 text=text,
+                 start_at=start_at,
+                 end_at=end_at).save()
+
+    
+    def synchronize_state(self, state):
+        self.state = state
+        channel_name = 'state_%s' % self.id
+        announce(channel_name, state)
 
     class Meta:
         ordering = ['-created']
 
 
 class Word(models.Model):
-    video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name='words')
+    video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='words')
     text = models.CharField(max_length=50)
     start_at = models.TimeField()
     end_at = models.TimeField()
