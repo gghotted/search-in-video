@@ -1,22 +1,41 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% for video in videos %}
-    <div class="uploading_video">
-        {{video.title}} {{video.created}}
-        <span class="state">{{video.state}}</span>
-        <span hidden class='video_id'>{{video.id}}</span>
-    </div>
-{% endfor %}
-<script>
-    var video_id = $('.video_id').text();
-    var webSocket = new WebSocket(
-        'ws://' + window.location.host + '/ws/' + video_id + '/state/');
+<table class="uploading-list">
+    <thead>
+        <tr> <td>시간</td> <td>제목</td> <td>상태</td> </tr>
+    </thead>
+    <tbody>
+        {% for video in videos %}
+        <tr>
+            <td>{{video.created | date:'Y-m-d H:i'}}</td>
+            <td>{{video.title}}</td>
+            <td class="state">{{video.state}}</td>
+            <td class="video_id" hidden>{{video.id}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-    webSocket.onmessage = function(e){
-        var data = JSON.parse(e.data);
-        var message = data['message'];
-        $('.state').text(message);
+<script>
+    var videos = $('.uploading-list>tbody>tr');
+    var webSockets = [];
+
+    for(var i=0; i<videos.length; i++){
+        var video = videos[i];
+        var id = video.querySelector('.video_id').textContent;
+        var state = video.querySelector('.state');
+        var webSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/' + id + '/state/'
+        );
+        webSocket.state = state;
+        webSocket.onmessage = function(e){
+            var state = e.srcElement.state;
+            var data = JSON.parse(e.data);
+            var message = data['message'];
+            state.textContent = message;
+        };
+        webSockets.push(WebSocket);
     }
 </script>
 {% endblock %}

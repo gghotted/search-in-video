@@ -72,6 +72,7 @@ class Video(models.Model):
         self.state = state
         channel_name = 'state_%s' % self.id
         announce(channel_name, state)
+        self.save()
 
     class Meta:
         ordering = ['-created']

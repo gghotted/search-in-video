@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect, HttpResponseRedirect
 from django.views.generic import View
 from django.core.files import File
 from django.contrib.auth.models import User
@@ -55,7 +55,7 @@ class UploadView(View):
         abstract_words_process.delay(video_id=video.id,
                                      videofile_path=videofile_path)
 
-        return HttpResponse('완료')
+        return HttpResponseRedirect('/state/uploading/list')
 
 
 class LoginView(View):

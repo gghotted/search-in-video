@@ -11,6 +11,6 @@ class UploadingListView(ListView):
 
     def get_queryset(self):
         videos = self.model.objects.exclude(
-            state='complete1'
+            state='완료'
         )
-        return videos[:1]
+        return videos

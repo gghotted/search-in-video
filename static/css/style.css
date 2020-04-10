@@ -132,4 +132,17 @@ video{
 .upload-methods>div:hover{
     background-color: #00adb5;
 }
-
+.uploading-list{
+    margin: 20px 0px;
+    width: 100%;
+}
+.uploading-list thead{
+    font-size: larger;
+    font-weight: bolder;
+    color: #00adb5;
+}
+.uploading-list td{
+    width: 33%;
+    text-align: center;
+    height: 50px;
+}
