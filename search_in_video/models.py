@@ -99,7 +99,7 @@ class Video(models.Model):
 
 class Word(models.Model):
     video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='words')
-    text = models.CharField(max_length=50)
+    text = models.CharField(max_length=255)
     extracted_by = models.CharField(max_length=50)
     start_at = models.TimeField()
     end_at = models.TimeField()

@@ -24,8 +24,8 @@
                 {% if request.user.is_authenticated %}
                 <span class="oatmeal">등록된 동영상 : </span>
                 <a class="strong" href="{% url 'home' %}">{{request.user.videos.all|length}}개</a>
-                {% endif %}
                 <button class="btn" onclick="location.href='{% url 'upload' %}'">+</button>
+                {% endif %}
             </div>
             <div class="search-info">
                 <form id="search_form" class="search-form" action="{% url 'list' %}">
@@ -36,7 +36,7 @@
             <div class="user-info">
                 {% if request.user.is_authenticated %}
                 <span class="oatmeal">"{{request.user}}"님 환영합니다</span>
-                <button class="btn" onclick="location.href='{% url 'login' %}'">로그아웃</button>
+                <button class="btn" onclick="location.href='{% url 'logout' %}'">로그아웃</button>
                 {% else %}
                 <button class="btn" onclick="location.href='{% url 'login' %}'">로그인</button>
                 <button class="btn" onclick="location.href='{% url 'signup' %}'">회원가입</button>

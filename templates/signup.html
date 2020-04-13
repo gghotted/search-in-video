@@ -1,10 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+<form method="post" class="signup_form">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td><label for="userid">아이디 : </label></td>
+            <td><input id="userid" type="text" name="username" value="{{request.POST.username}}"></td>
+        </tr>
+        <tr>
+            <td><label for="password">비밀번호 : </label></td>
+            <td><input id="password" type="password" name="password"></td>
+        </tr>
+        <tr>
+            <td><label for="confirm_password">비밀번호 확인 : </label></td>
+            <td><input id="confirm_password" type="password"></td>
+        </tr>
+        <tr>
+            <td colspan="2"><span id="confirm_msg"></span></td>
+        </tr>
+        <tr>
+            <td colspan="2"><button>가입</button></td>
+        </tr>
+    </table>
+</form>
+<script>
+$(function(){
+    var userid = $('#userid');
+    var pwd = $('#password');
+    var confirm_pwd = $('#confirm_password');
+    var confirm_msg = $('#confirm_msg');
+    var regex = /^[A-Za-z0-9]{6,12}$/;
+
+    userid.keyup(function(){
+        if(!regex.test(userid.val())){
+            confirm_msg.text('영문자, 숫자 6~12이어야 합니다');
+            confirm_msg.css('color', 'red');
+            return
+        }
+        $.ajax({
+            url: '/ajax/userid',
+            data: {username: userid.val()},
+            success: function(data){
+                var result = data.result;
+                if(result == true){
+                    confirm_msg.text('사용 가능합니다');
+                    confirm_msg.css('color', 'green');
+                }
+                    
+                else{
+                    confirm_msg.text('이미 사용중입니다')
+                    confirm_msg.css('color', 'red');
+                }
+            }
+        });
+    });
+
+    confirm_pwd.keyup(function(){
+        if(pwd.val() != confirm_pwd.val()){
+            confirm_msg.text('비밀번호가 다릅니다');
+            confirm_msg.css('color', 'red');
+            return
+        }
+
+        if(!regex.test(pwd.val())){
+            confirm_msg.text('영문자, 숫자 6~12이어야 합니다');
+            confirm_msg.css('color', 'red');
+            return
+        }
+
+        confirm_msg.text('사용 가능합니다');
+        confirm_msg.css('color', 'green');
+    });
+});
+</script>
+{% endblock %}

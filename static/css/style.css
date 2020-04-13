@@ -146,3 +146,10 @@ video{
     text-align: center;
     height: 50px;
 }
+.login_form>table, .signup_form>table{
+    margin: 100px auto;
+    text-align: right;
+}
+.login_form td, .signup_form td{
+    padding: 15px;
+}

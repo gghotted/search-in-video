@@ -4,7 +4,7 @@ $(function(){
         source: function(request, response){
             $.ajax({
                 method: 'get',
-                url: 'ajax/match',
+                url: '/ajax/match',
                 dataType: 'json',
                 data: {find_text: $('#find_text').val()},
                 success: function(json_response){
