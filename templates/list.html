@@ -13,11 +13,6 @@
     {% for word in words %}
         <div class="word">
             <span class="word-time">{{word.start_at | date:'H:i:s'}}</span>
-            <div>
-                {% for near_word in word.near_words %}
-                {{near_word}}-{{near_word.start_at | date:'H:i:s'}},
-                {% endfor %}
-            </div>
             <span class="sec-time" hidden>{{word.start_at | seconds }}</span>
         </div>
     {% endfor %}

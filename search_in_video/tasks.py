@@ -11,7 +11,11 @@ def abstract_words_process(video_id, videofile_path):
     video.set_videofile(videofile_path)
     video.set_audio()
 
-    video.synchronize_state('단어 추출중..')
-    video.create_words()
+    video.synchronize_state('단어 추출중(audio)..')
+    video.create_words_by_audio()
+
+    video.synchronize_state('단어 추출중(video)..')
+    video.create_words_by_video()
+
     video.synchronize_state('완료')
 

@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.core.files import File
 
 from .youtube import MyYoutube
-from .util import recognize_by_google_stt, get_timestamp
+from .google_api import recognize_by_google_ocr, get_timestamp_ocr_result
+from .google_api import recognize_by_google_stt, get_timestamp_stt_result
 from state.consumers import announce
 
 import moviepy.editor as mp
@@ -59,13 +60,31 @@ class Video(models.Model):
         self.audio = audio_file
 
 
-    def create_words(self):
+    def create_words_by_audio(self):
         response = recognize_by_google_stt(self.audio)
-        for text, start_at, end_at in get_timestamp(response):
+        datas = get_timestamp_stt_result(response)
+        for text, start_at, end_at in datas:
             Word(video=self,
+                 extracted_by='audio',
                  text=text,
                  start_at=start_at,
                  end_at=end_at).save()
+
+
+    def create_words_by_video(self):
+        response = recognize_by_google_ocr(self.video)
+        datas = get_timestamp_ocr_result(response)
+        for text, start_at, end_at, topleft, bottomright in datas:
+            word = Word(video=self,
+                        extracted_by='video',
+                        text=text,
+                        start_at=start_at,
+                        end_at=end_at)
+            word.save()
+            for vertex in [topleft, bottomright]:
+                Vertex(word=word,
+                       x=vertex.x,
+                       y=vertex.y).save()
 
     
     def synchronize_state(self, state):
@@ -81,6 +100,7 @@ class Video(models.Model):
 class Word(models.Model):
     video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='words')
     text = models.CharField(max_length=50)
+    extracted_by = models.CharField(max_length=50)
     start_at = models.TimeField()
     end_at = models.TimeField()
 
@@ -89,3 +109,9 @@ class Word(models.Model):
 
     def near_words(self):
         return Word.objects.filter(start_at__gte=self.start_at).order_by('start_at')[:5]
+
+
+class Vertex(models.Model):
+    word = models.ForeignKey(Word, on_delete=models.CASCADE, related_name='vertices')
+    x = models.FloatField()
+    y = models.FloatField()

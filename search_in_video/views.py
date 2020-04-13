@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.db.models.functions import Length
 
 from .models import Video, Word
 from .youtube import MyYoutube
@@ -30,7 +31,7 @@ class ListView(View):
 
         videos = Video.objects.filter(user=user)
         if find_text:
-            videos = videos.filter(words__text__startswith=find_text).order_by('-created').distinct()
+            videos = videos.filter(words__text__icontains=find_text).order_by(Length('words__text')).distinct()
 
         return render(request, 'list.html', {'videos': videos})
 
@@ -50,7 +51,8 @@ class UploadView(View):
         video = Video.objects.create(user=user,
                                      title=title,
                                      source_type=source_type,
-                                     youtube_link=youtube_link)
+                                     youtube_link=youtube_link,
+                                     state='대기중')
 
         videofile_path = load_as_tempfile(videofile) if videofile else None
         abstract_words_process.delay(video_id=video.id,
@@ -81,8 +83,8 @@ def ajax_match(request):
     user = request.user
     find_text = request.GET.get('find_text', '')
     words = Word.objects.filter(video__user=user,
-                                text__startswith=find_text)
-    response_words_list = list(words.values_list('text', flat=True).distinct())
+                                text__icontains=find_text)
+    response_words_list = list(words.values_list('text', flat=True).order_by(Length('text')).distinct())
     return JsonResponse({'words_list': response_words_list})
 
 

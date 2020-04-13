@@ -1,7 +1,11 @@
 from google.cloud import videointelligence_v1p2beta1 as videointelligence
+from google.cloud import speech_v1
 from django.conf import settings
 
-# test   
+
+from .util import sec2time
+
+
 def recognize_by_google_stt(audio):
     print('함수 진입')
     
@@ -23,6 +27,15 @@ def recognize_by_google_stt(audio):
     return result
 
 
+def get_timestamp_stt_result(response):
+    for result in response.results:
+        for alternative in result.alternatives:
+            for word in alternative.words:
+                start_time = sec2time(word.start_time.seconds, word.start_time.nanos / 10 ** 3)
+                end_time = sec2time(word.end_time.seconds, word.end_time.nanos / 10 ** 3)
+                yield (word.word, start_time, end_time)
+
+
 def recognize_by_google_ocr(video):
     storage_uri = f'gs://{settings.GS_BUCKET_NAME}/{video.name}'
     video_client = videointelligence.VideoIntelligenceServiceClient()
@@ -32,31 +45,28 @@ def recognize_by_google_ocr(video):
         input_uri=storage_uri,
         features=features
     )
-    print('\nProcessing video for text detection.')
-    result = operation.result(timeout=300)
+    result = operation.result()
+    return result
 
-    # The first result is retrieved because a single video was processed.
+
+def get_timestamp_ocr_result(result):
     annotation_result = result.annotation_results[0]
 
-    # Get only the first result
-    text_annotation = annotation_result.text_annotations[0]
-    print('\nText: {}'.format(text_annotation.text))
+    for text_annotation in annotation_result.text_annotations:
+        text = text_annotation.text
+        text_segments = text_annotation.segments
+        for text_segment in text_segments:
+            start_time_offset = text_segment.segment.start_time_offset
+            end_time_offset = text_segment.segment.end_time_offset
+            start_time = sec2time(start_time_offset.seconds,
+                                  start_time_offset.nanos / (10**3))
+            end_time = sec2time(end_time_offset.seconds,
+                                  end_time_offset.nanos / (10**3))
 
-    # Get the first text segment
-    text_segment = text_annotation.segments[0]
-    start_time = text_segment.segment.start_time_offset
-    end_time = text_segment.segment.end_time_offset
-    print('start_time: {}, end_time: {}'.format(
-        start_time.seconds + start_time.nanos * 1e-9,
-        end_time.seconds + end_time.nanos * 1e-9))
+            frame = text_segment.frames[0]
+            vertices = frame.rotated_bounding_box.vertices
+            topleft = vertices[0]
+            bottomright = vertices[2]
+            yield (text, start_time, end_time, topleft, bottomright)
 
-    print('Confidence: {}'.format(text_segment.confidence))
 
-    # Show the result for the first frame in this segment.
-    frame = text_segment.frames[0]
-    time_offset = frame.time_offset
-    print('Time offset for the first frame: {}'.format(
-        time_offset.seconds + time_offset.nanos * 1e-9))
-    print('Rotated Bounding Box Vertices:')
-    for vertex in frame.rotated_bounding_box.vertices:
-        print('\tVertex.x: {}, Vertex.y: {}'.format(vertex.x, vertex.y))
