@@ -1,4 +1,4 @@
-from server.celery import app
+from config.celery import app
 
 from .models import Video
 

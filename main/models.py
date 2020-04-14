@@ -5,7 +5,7 @@ from django.core.files import File
 from .youtube import MyYoutube
 from .google_api import recognize_by_google_ocr, get_timestamp_ocr_result
 from .google_api import recognize_by_google_stt, get_timestamp_stt_result
-from state.consumers import announce
+from video_state.consumers import announce
 
 import moviepy.editor as mp
  

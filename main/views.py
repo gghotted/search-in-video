@@ -24,7 +24,7 @@ class IndexView(LoginRequiredMixin, View):
         videos = None
         if request.user:
             videos = request.user.videos.all()
-        return render(request, 'home.html', {'videos': videos})
+        return render(request, 'main/index.html', {'videos': videos})
 
 
 class ListView(LoginRequiredMixin, View):
@@ -38,7 +38,7 @@ class ListView(LoginRequiredMixin, View):
         if find_text:
             videos = videos.filter(words__text__icontains=find_text).order_by(Length('words__text')).distinct()
 
-        return render(request, 'list.html', {'videos': videos})
+        return render(request, 'main/list.html', {'videos': videos})
 
 
 class UploadView(LoginRequiredMixin, View):

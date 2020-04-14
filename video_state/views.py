@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import ListView
 
-from search_in_video.models import Video
+from main.models import Video
 
 
 class UploadingListView(ListView):

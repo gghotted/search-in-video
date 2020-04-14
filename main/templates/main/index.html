@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>내 동영상</h2>
+
+{% for video in videos %}
+    {% if video.video %}
+    <div class="video-box-2">
+        <video src="{{video.video.url}}" width="396px"></video>
+        <h4>{{video.title}}</h4>
+    </div>
+    {% endif %}
+{% endfor %}
+{% endblock %}
