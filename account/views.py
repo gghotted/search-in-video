@@ -1,14 +1,15 @@
-from django.shortcuts import render, reverse, HttpResponseRedirect, redirect
 from django.contrib.auth.views import LoginView
 from django.views.generic import CreateView
+from django.urls import reverse_lazy
 
-from .forms import LoginForm
+from .forms import CreateUserForm, LoginForm
 from .models import User
 
 
 class CreateUserView(CreateView):
     model = User
-    fields = ('username', 'password')
+    form_class = CreateUserForm
+    success_url = reverse_lazy('main:index')
 
 
 class LoginView(LoginView):

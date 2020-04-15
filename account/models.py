@@ -12,7 +12,7 @@ class UserManager(BaseUserManager):
             raise ValueError('must have user userid')        
         user = self.model(                  
             username=username        
-        )        
+        )
         user.set_password(password)        
         user.save(using=self._db)        
         return user     
@@ -32,10 +32,6 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    def __init__(self, *args, **kwargs):
-        super(User, self).__init__(*args, **kwargs)
-        self._meta.get_field('password').verbose_name = '패스워드'
-
     objects = UserManager()
 
     username = models.CharField(
