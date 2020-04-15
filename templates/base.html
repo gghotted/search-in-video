@@ -17,18 +17,18 @@
     <!--header-->
     <div class="header">
         <div class="site-title-box">
-            <a href="{% url 'home' %}">Search in Video</a>
+            <a href="{% url 'main:index' %}">Search in Video</a>
         </div>
         <div class="header-info-box">
             <div class="user-storage-info">
                 {% if request.user.is_authenticated %}
                 <span class="oatmeal">등록된 동영상 : </span>
-                <a class="strong" href="{% url 'home' %}">{{request.user.videos.all|length}}개</a>
-                <button class="btn" onclick="location.href='{% url 'upload' %}'">+</button>
+                <a class="strong" href="{% url 'main:index' %}">{{request.user.videos.all|length}}개</a>
+                <button class="btn" onclick="location.href='{% url 'main:upload' %}'">+</button>
                 {% endif %}
             </div>
             <div class="search-info">
-                <form id="search_form" class="search-form" action="{% url 'list' %}">
+                <form id="search_form" class="search-form" action="{% url 'main:list' %}">
                     <input id="find_text" name="find_text" value="{{request.GET.find_text}}">
                     <button><i class="fa fa-search"></i></button>
                 </form>
@@ -36,10 +36,10 @@
             <div class="user-info">
                 {% if request.user.is_authenticated %}
                 <span class="oatmeal">"{{request.user}}"님 환영합니다</span>
-                <button class="btn" onclick="location.href='{% url 'logout' %}'">로그아웃</button>
+                <button class="btn" onclick="location.href='{% url 'account:logout' %}'">로그아웃</button>
                 {% else %}
-                <button class="btn" onclick="location.href='{% url 'login' %}'">로그인</button>
-                <button class="btn" onclick="location.href='{% url 'signup' %}'">회원가입</button>
+                <button class="btn" onclick="location.href='{% url 'account:login' %}'">로그인</button>
+                <button class="btn" onclick="location.href='{% url 'account:signup' %}'">회원가입</button>
                 {% endif %}
             </div>
         </div>

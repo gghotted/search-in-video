@@ -1,11 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.core.files import File
 
 from .youtube import MyYoutube
 from .google_api import recognize_by_google_ocr, get_timestamp_ocr_result
 from .google_api import recognize_by_google_stt, get_timestamp_stt_result
+
 from video_state.consumers import announce
+from account.models import User
 
 import moviepy.editor as mp
  

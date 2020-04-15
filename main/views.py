@@ -1,7 +1,6 @@
 from django.shortcuts import render, HttpResponse, redirect, HttpResponseRedirect, reverse
-from django.views.generic import View, CreateView
+from django.views.generic import View, CreateView, ListView
 from django.core.files import File
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -13,36 +12,19 @@ from .youtube import MyYoutube
 from .tasks import abstract_words_process
 from .util import load_as_tempfile
 
+from account.models import User
+
 import tempfile
 
 
-class IndexView(LoginRequiredMixin, View):
-    login_url = '/login'
-    redirect_field_name = 'nextpage'
+class IndexView(LoginRequiredMixin, ListView):
 
-    def get(self, request):
-        videos = None
-        if request.user:
-            videos = request.user.videos.all()
-        return render(request, 'main/index.html', {'videos': videos})
-
-
-class ListView(LoginRequiredMixin, View):
-    login_url = '/login'
-    redirect_field_name = 'nextpage'
-
-    def get(self, request):
-        user = request.user
-        find_text = request.GET.get('find_text')
-        videos = Video.objects.filter(user=user)
-        if find_text:
-            videos = videos.filter(words__text__icontains=find_text).order_by(Length('words__text')).distinct()
-
-        return render(request, 'main/list.html', {'videos': videos})
+    model = Video
+    template_name = 'main/index.html'
 
 
 class UploadView(LoginRequiredMixin, View):
-    login_url = '/login'
+    login_url = 'account/login'
     redirect_field_name = 'nextpage'
 
     def get(self, request, source_type='choice'):
@@ -69,43 +51,18 @@ class UploadView(LoginRequiredMixin, View):
         return HttpResponseRedirect('/state/uploading/list')
 
 
-class CreateUserView(View):
+class ListView(LoginRequiredMixin, View):
+    login_url = '/login'
+    redirect_field_name = 'nextpage'
+
     def get(self, request):
-        return render(request, 'signup.html')
+        user = request.user
+        find_text = request.GET.get('find_text')
+        videos = Video.objects.filter(user=user)
+        if find_text:
+            videos = videos.filter(words__text__icontains=find_text).order_by(Length('words__text')).distinct()
 
-    def post(self, request):
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = User(username=username)
-        user.set_password(password)
-        user.save()
-        login(request, user)
-
-        return redirect('home') 
-
-
-class LoginView(View):
-    def get(self, request):
-        return render(request, 'login.html')
-
-    def post(self, request):
-        redirect_url = request.GET.get('nextpage', reverse('home'))
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-
-        if user:
-            login(request, user)
-            return HttpResponseRedirect(redirect_url)
-        else:
-            error_msg = '잘못된 정보입니다.'
-            return render(request, 'login.html', {'error_msg': error_msg})
-
-
-class LogoutView(View):
-    def get(self, request):
-        logout(request)
-        return redirect('home')
+        return render(request, 'main/list.html', {'videos': videos})
 
 
 @login_required
