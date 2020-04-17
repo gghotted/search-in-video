@@ -10,6 +10,4 @@ urlpatterns = [
     path('list', views.ListView.as_view(), name='list'),
     path('upload', views.UploadView.as_view(), name='upload'),
     path('upload/<str:source_type>', views.UploadView.as_view(), name='upload'),
-    path('ajax/match', views.ajax_match, name='match'),
-    path('ajax/userid', views.ajax_userid)
 ]

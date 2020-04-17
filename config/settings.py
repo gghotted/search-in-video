@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'account',
+    'search',
     'django_extensions',
 ]
 
