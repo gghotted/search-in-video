@@ -154,4 +154,4 @@ LOGOUT_REDIRECT_URL = '/'
 
 REDIRECT_FIELD_NAME = 'next'
 
-AUTH_USER_MODEL = 'account.User'
+AUTH_USER_MODEL = 'account.User' 

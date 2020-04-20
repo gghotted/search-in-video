@@ -1,8 +1,95 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<form method="post">{% csrf_token %}
-    {{form.as_p}}
-    <button>가입</button>
+<form method="post" id="signup_form" class="signup_form">{% csrf_token %}
+    <table>
+        {% for message in messages %}
+        <tr>
+            <td colspan="2">{{ message.message }}</td>
+        </tr>
+        {% endfor %}
+        {% for field in form %}
+        <tr>
+            <td colspan="2"><span id="message_{{field.name}}"></td>
+        </tr>
+        <tr>
+            <td>{{field.label_tag}}</td>
+            <td>{{field}}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="2"><button>회원가입</button></td>
+        </tr>
+    </table>
 </form>
+<script>
+$(function(){
+    var userid = $('#id_username');
+    var pwd = $('#id_password');
+    var confirm_pwd = $('#id_confirm_password');
+    var message_username = $('#message_username');
+    var message_password = $('#message_password');
+    var form = $('#signup_form');
+
+    var regex = /^[A-Za-z0-9]{6,12}$/;
+    var pwd_check = false;
+    var username_check = false;
+
+    form.submit(function(){
+        if(pwd_check && username_check)
+            return true;
+        else{
+            alert('아이디와 비밀번호를 확인해주세요');
+            return false;
+        }
+    })
+
+    userid.keyup(function(){
+        if(!regex.test(userid.val())){
+            message_username.text('영문자, 숫자 6~12이어야 합니다');
+            message_username.css('color', 'red');
+            username_check = false;
+            return
+        }
+        $.ajax({
+            url: '/search/userid',
+            data: {username: userid.val()},
+            success: function(data){
+                var result = data.result;
+                if(result == true){
+                    message_username.text('사용 가능합니다');
+                    message_username.css('color', 'green');
+                    username_check = true;
+                }
+                    
+                else{
+                    message_username.text('이미 사용중입니다')
+                    message_username.css('color', 'red');
+                    username_check = false;
+                }
+            }
+        });
+    });
+
+    confirm_pwd.keyup(function(){
+        if(pwd.val() != confirm_pwd.val()){
+            message_password.text('비밀번호가 다릅니다');
+            message_password.css('color', 'red');
+            pwd_check = false;
+            return
+        }
+
+        if(!regex.test(pwd.val())){
+            message_password.text('영문자, 숫자 6~12이어야 합니다');
+            message_password.css('color', 'red');
+            pwd_check = false;
+            return
+        }
+
+        message_password.text('사용 가능합니다');
+        message_password.css('color', 'green');
+        pwd_check = true;
+    });
+});
+</script>
 {% endblock %}

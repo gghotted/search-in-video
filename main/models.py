@@ -105,6 +105,9 @@ class Word(models.Model):
     start_at = models.TimeField()
     end_at = models.TimeField()
 
+    class Meta:
+        ordering = ['extracted_by', 'start_at']
+
     def __str__(self):
         return self.text
 

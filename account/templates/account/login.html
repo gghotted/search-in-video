@@ -3,7 +3,22 @@
 {% block content %}
 <form method="post" class="login_form">
     {% csrf_token %}
-    {{form.as_p}}
-    <button>로그인</button>
+    <table>
+        {% for message in messages %}
+        <tr>
+            <td colspan="2">{{ message.message }}</td>
+        </tr>
+        {% endfor %}
+    {% for field in form %}
+        <tr>
+            <td>{{field.label_tag}}</td>
+            <td>{{field}}</td>
+        </tr>
+    {% endfor %}
+        <tr>
+            <td colspan="2"><button>로그인</button></td>
+        </tr>
+    </table>
+        
 </form>
 {% endblock %}

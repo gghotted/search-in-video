@@ -1,6 +1,9 @@
 from django.urls import path
 from . import views
 
+
+app_name = 'video_state'
+
 urlpatterns = [
-    path('uploading/list', views.UploadingListView.as_view()),
+    path('list', views.UploadingListView.as_view()),
 ]

@@ -153,3 +153,7 @@ video{
 .login_form td, .signup_form td{
     padding: 15px;
 }
+img.recognize_type{
+    width: 25px;
+    height: 25px;
+}

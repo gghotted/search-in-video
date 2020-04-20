@@ -17,17 +17,19 @@ import tempfile
 
 
 class IndexView(LoginRequiredMixin, ListView):
-
     model = Video
     template_name = 'main/index.html'
+    context_object_name = 'videos'
+
+    def get_queryset(self):
+        user = self.request.user
+        videos = Video.objects.filter(user=user)
+        return videos
 
 
 class UploadView(LoginRequiredMixin, View):
-    login_url = 'account/login'
-    redirect_field_name = 'nextpage'
-
     def get(self, request, source_type='choice'):
-        template_name = 'upload_' + source_type.replace('-', '_') + '.html'
+        template_name = 'main/upload_' + source_type.replace('-', '_') + '.html'
         return render(request, template_name)
 
 
@@ -50,15 +52,16 @@ class UploadView(LoginRequiredMixin, View):
         return HttpResponseRedirect('/state/uploading/list')
 
 
-class ListView(LoginRequiredMixin, View):
-    login_url = '/login'
-    redirect_field_name = 'nextpage'
+class ListView(LoginRequiredMixin, ListView):
+    model = Video
+    template_name = 'main/list.html'
+    context_object_name = 'videos'
 
-    def get(self, request):
-        user = request.user
-        find_text = request.GET.get('find_text')
-        videos = Video.objects.filter(user=user)
-        if find_text:
-            videos = videos.filter(words__text__icontains=find_text).order_by(Length('words__text')).distinct()
-
-        return render(request, 'main/list.html', {'videos': videos})
+    def get_queryset(self):
+        user = self.request.user
+        find_text = self.request.GET.get('find_text')
+        videos = Video.objects.filter(
+            user=user,
+            words__text__icontains=find_text,
+        ).distinct()
+        return videos

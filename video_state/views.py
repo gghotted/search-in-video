@@ -5,7 +5,7 @@ from main.models import Video
 
 
 class UploadingListView(ListView):
-    template_name = 'uploading.html'
+    template_name = 'video_state/list.html'
     context_object_name = 'videos'
     model = Video
 

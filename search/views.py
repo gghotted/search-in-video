@@ -1,13 +1,14 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.db.models.functions import Length
 
 from main.models import Word
 from account.models import User
 
 
 @login_required
-def ajax_match(request):
+def search_words(request):
     user = request.user
     find_text = request.GET.get('find_text', '')
     words = Word.objects.filter(video__user=user,
@@ -16,7 +17,7 @@ def ajax_match(request):
     return JsonResponse({'words_list': response_words_list})
 
 
-def ajax_userid(request):
+def serach_userid(request):
     username = request.GET.get('username')
     get_user = User.objects.filter(username=username)
     if len(get_user) == 0:

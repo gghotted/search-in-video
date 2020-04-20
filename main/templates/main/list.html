@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% load util_tags %}
 
 {% block content %}
@@ -6,18 +8,54 @@
 
 {% for video in videos %}
 <div class="video-box-1">
-    <video src="{{video.video.url}}" width="796px" controls></video>
+    <video id="video1" src="{{video.video.url}}" width="796px" controls></video>
     <h4>{{video.title}}</h4>
     {% call_method video 'filter_words' request.GET.find_text as words %}
     <div class="words">
     {% for word in words %}
         <div class="word">
+            {% if word.extracted_by == 'audio' %}
+            <img class="recognize_type" src="{% static 'images/sound_icon.png' %}">
+            {% else %}
+            <img class="recognize_type" src="{% static 'images/text_icon.png' %}">
+            {% endif %}
             <span class="word-time">{{word.start_at | date:'H:i:s'}}</span>
             <span class="sec-time" hidden>{{word.start_at | seconds }}</span>
         </div>
     {% endfor %}
     </div>
 </div>
+<div class="test_canvas">
+    <canvas id='canvas'></canvas>
+</div>
+<script>
+$(function(){
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    var canvas = document.getElementById('canvas');
+    canvas.width = 1200;
+    canvas.height = 800;
+    var ctx = canvas.getContext('2d');
+    var video  = document.getElementById('video1');
+    var words = $('.word-time');
+
+    words.mouseover(function(){
+        var time = $(this).siblings('.sec-time').text();
+        video.currentTime = time;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0)
+    })
+
+    video.addEventListener('loadeddata', function(){
+        var $this = this;
+        ctx.drawImage($this, 0, 0);
+    })
+
+})
+</script>
 {% endfor %}
 
 {% endblock %}

@@ -35,3 +35,4 @@ class LoginForm(AuthenticationForm):
         super(LoginForm, self).__init__(request, *args, **kwargs)
         self.fields['password'].label = '패스워드'
         self.label_suffix = ''
+
